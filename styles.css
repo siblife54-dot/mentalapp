@@ -77,7 +77,10 @@ h1 {
   overflow: auto;
 }
 
-.content { display: grid; }
+.content {
+  display: grid;
+  padding-bottom: 110px;
+}
 
 .screen {
   display: none;
@@ -207,6 +210,36 @@ button.primary {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.analytics-controls-card {
+  display: grid;
+  gap: 12px;
+}
+
+.analytics-chart-card {
+  background: var(--card);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.analytics-chart-wrap {
+  position: relative;
+  height: 240px;
+  min-height: 240px;
+  max-height: 240px;
+  overflow: hidden;
+}
+
+.analytics-chart-wrap canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.analytics-chart-empty {
+  padding: 12px 0 0;
 }
 
 .chip {
