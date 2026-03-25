@@ -51,7 +51,6 @@
     showDebugError('Unhandled promise rejection', event.reason || 'Unknown rejection');
   });
 
-  initApp();
 
   async function initApp() {
     try {
@@ -667,4 +666,7 @@
     ui.debugText.textContent = text;
     ui.debugPanel.hidden = false;
   }
+
+  // Start app only after all declarations (including storage) are initialized.
+  initApp();
 })();
