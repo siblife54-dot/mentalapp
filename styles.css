@@ -229,6 +229,22 @@ button.primary {
   padding: 24px;
 }
 
+.chart-card {
+  padding: 14px;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 240px;
+  width: 100%;
+}
+
+.chart-wrap canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .tabbar {
   position: fixed;
   left: 16px;

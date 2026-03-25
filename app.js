@@ -361,7 +361,12 @@
               ${Object.entries(METRICS).map(([key, label]) => `<button class="chip ${state.metric === key ? 'active' : ''}" data-metric="${key}">${label}</button>`).join('')}
             </div>
           </div>
-          <canvas id="analyticsChart" height="130"></canvas>
+        </section>
+
+        <section class="section-card chart-card">
+          <div class="chart-wrap">
+            <canvas id="analyticsChart"></canvas>
+          </div>
         </section>
       `;
 
