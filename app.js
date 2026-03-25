@@ -137,7 +137,9 @@
     try {
       renderToday();
       renderHistory();
-      renderAnalytics();
+      if (state.activeTab === 'analytics') {
+        renderAnalytics();
+      }
     } catch (error) {
       console.error('[renderApp] Render failed:', error);
       showDebugError('renderApp()', error);
@@ -159,7 +161,9 @@
       console.error('[safeFallbackRender] renderHistory failed:', error);
     }
     try {
-      renderAnalytics();
+      if (state.activeTab === 'analytics') {
+        renderAnalytics();
+      }
     } catch (error) {
       console.error('[safeFallbackRender] renderAnalytics failed:', error);
     }
@@ -348,7 +352,7 @@
           </div>
         </section>
 
-        <section class="section-card" style="display:grid; gap:12px;">
+        <section class="section-card analytics-controls-card">
           <div>
             <p class="muted">Период</p>
             <div class="controls">
@@ -361,8 +365,14 @@
               ${Object.entries(METRICS).map(([key, label]) => `<button class="chip ${state.metric === key ? 'active' : ''}" data-metric="${key}">${label}</button>`).join('')}
             </div>
           </div>
-          <canvas id="analyticsChart" height="130"></canvas>
         </section>
+
+        <div class="analytics-chart-card">
+          <div class="analytics-chart-wrap">
+            <canvas id="analyticsChart"></canvas>
+          </div>
+          <p class="empty analytics-chart-empty" id="analyticsChartEmpty" hidden>Нет данных для выбранного периода.</p>
+        </div>
       `;
 
       root.querySelectorAll('[data-period]').forEach((el) => {
@@ -379,7 +389,16 @@
         });
       });
 
-      drawChart(root.querySelector('#analyticsChart'));
+      const isAnalyticsVisible = state.activeTab === 'analytics' && root.classList.contains('active');
+      if (isAnalyticsVisible) {
+        renderAnalyticsChart();
+      } else {
+        console.log('[renderAnalytics] Skip chart render: analytics screen is hidden');
+        if (state.chart) {
+          state.chart.destroy();
+          state.chart = null;
+        }
+      }
     } catch (error) {
       console.error('[renderAnalytics] Render analytics failed:', error);
       showDebugError('renderAnalytics()', error);
@@ -387,15 +406,44 @@
     }
   }
 
-  function drawChart(canvas) {
-    if (!canvas || typeof window.Chart === 'undefined') return;
+  function renderAnalyticsChart() {
+    const root = ui.screens.analytics;
+    const wrap = root.querySelector('.analytics-chart-wrap');
+    const canvas = root.querySelector('#analyticsChart');
+    const emptyState = root.querySelector('#analyticsChartEmpty');
+
+    const wrapRect = wrap ? wrap.getBoundingClientRect() : null;
+    console.log('[renderAnalyticsChart] wrap rect:', wrapRect);
+    console.log('[renderAnalyticsChart] canvas found:', Boolean(canvas));
+
+    if (!canvas || !wrap || typeof window.Chart === 'undefined') {
+      console.log('[renderAnalyticsChart] chart skipped: missing canvas/wrap or Chart.js unavailable');
+      if (state.chart) {
+        state.chart.destroy();
+        state.chart = null;
+      }
+      if (emptyState) emptyState.hidden = false;
+      return;
+    }
 
     const points = getRecordsForPeriod(state.period).sort((a, b) => a.date.localeCompare(b.date));
     const labels = points.map((x) => x.date.slice(5));
     const values = points.map((x) => x[state.metric]);
+    console.log('[renderAnalyticsChart] dataset points:', values.length);
 
-    if (state.chart) state.chart.destroy();
+    if (state.chart) {
+      state.chart.destroy();
+      state.chart = null;
+    }
 
+    if (!values.length) {
+      console.log('[renderAnalyticsChart] chart skipped: empty dataset');
+      if (emptyState) emptyState.hidden = false;
+      return;
+    }
+
+    if (emptyState) emptyState.hidden = true;
+    console.log('[renderAnalyticsChart] creating chart');
     state.chart = new Chart(canvas, {
       type: 'line',
       data: {
