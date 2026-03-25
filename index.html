@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Трекер состояния</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar card">
+        <div>
+          <p class="muted" id="greeting">Привет</p>
+          <h1>Трекер состояния</h1>
+        </div>
+        <div class="today-badge" id="todayDate"></div>
+      </header>
+
+      <div id="debugPanel" class="debug-panel" hidden>
+        <strong>⚠️ Ошибка JavaScript:</strong>
+        <pre id="debugText"></pre>
+      </div>
+
+      <main class="content">
+        <section id="screen-today" class="screen active"></section>
+        <section id="screen-history" class="screen"></section>
+        <section id="screen-analytics" class="screen"></section>
+      </main>
+
+      <nav class="tabbar card" aria-label="Нижняя навигация">
+        <button class="tab active" data-tab="today">Сегодня</button>
+        <button class="tab" data-tab="history">История</button>
+        <button class="tab" data-tab="analytics">Аналитика</button>
+      </nav>
+    </div>
+
+    <dialog id="entryDialog" class="entry-dialog"></dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
