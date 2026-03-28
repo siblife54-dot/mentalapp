@@ -171,6 +171,49 @@ button.primary {
   background: var(--accent);
 }
 
+button.secondary {
+  border: 1px solid #d8e1eb;
+  border-radius: 16px;
+  padding: 12px 14px;
+  font: inherit;
+  font-weight: 600;
+  color: #47607e;
+  background: #f6f9fc;
+}
+
+button.secondary:active {
+  background: #ecf1f7;
+}
+
+.subtle-primary {
+  padding: 11px 14px;
+  font-size: 0.95rem;
+}
+
+.backfill-card {
+  display: grid;
+  gap: 8px;
+  margin-top: 2px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid #e7edf5;
+  background: #fbfdff;
+}
+
+.backfill-card h3 {
+  font-size: 1rem;
+}
+
+.backfill-card input[type="date"] {
+  width: 100%;
+  border: 1px solid #d9e3ee;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--text);
+  background: white;
+}
+
 .status {
   font-size: 0.85rem;
   color: var(--subtext);
