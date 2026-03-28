@@ -21,6 +21,7 @@
   const state = {
     records: [],
     todayDraft: null,
+    isBackfillOpen: false,
     chart: null,
     activeTab: 'today',
     period: '7',
@@ -208,6 +209,13 @@
           <label for="noteInput"><h3>Заметка</h3></label>
           <textarea id="noteInput" placeholder="Что было важно сегодня?">${escapeHtml(draft.note || '')}</textarea>
           <button class="primary" id="saveBtn">Сохранить</button>
+          <button class="secondary" id="toggleBackfillBtn">Заполнить пропущенный день</button>
+          <section class="backfill-card" id="backfillBlock" ${state.isBackfillOpen ? '' : 'hidden'}>
+            <h3>Выберите дату</h3>
+            <input type="date" id="backfillDateInput" max="${todayStr()}" value="${todayStr()}" />
+            <button class="primary subtle-primary" id="saveBackfillBtn">Сохранить за эту дату</button>
+            <p class="status" id="backfillStatus">Готово к сохранению</p>
+          </section>
           <p class="status" id="saveStatus">Готово к сохранению</p>
         </section>
       `;
@@ -235,6 +243,11 @@
       });
 
       root.querySelector('#saveBtn').addEventListener('click', saveTodayEntry);
+      root.querySelector('#toggleBackfillBtn').addEventListener('click', () => {
+        state.isBackfillOpen = !state.isBackfillOpen;
+        renderToday();
+      });
+      root.querySelector('#saveBackfillBtn').addEventListener('click', saveBackfillEntry);
     } catch (error) {
       console.error('[renderToday] Render today failed:', error);
       showDebugError('renderToday()', error);
@@ -244,9 +257,35 @@
 
   async function saveTodayEntry() {
     const statusEl = ui.screens.today.querySelector('#saveStatus');
+    await saveEntryForDate(todayStr(), statusEl);
+  }
+
+  async function saveBackfillEntry() {
+    const statusEl = ui.screens.today.querySelector('#backfillStatus');
+    const dateInput = ui.screens.today.querySelector('#backfillDateInput');
+    const selectedDate = dateInput?.value;
+    const today = todayStr();
 
     try {
-      const draft = normalizeEntry(state.todayDraft);
+      if (!selectedDate) {
+        statusEl.textContent = 'Выберите дату';
+        return;
+      }
+      if (selectedDate > today) {
+        statusEl.textContent = 'Дата не может быть больше сегодняшней';
+        return;
+      }
+      await saveEntryForDate(selectedDate, statusEl);
+    } catch (error) {
+      console.error('[saveBackfillEntry] Save failed:', error);
+      showDebugError('saveBackfillEntry()', error);
+      if (statusEl) statusEl.textContent = 'Ошибка сохранения';
+    }
+  }
+
+  async function saveEntryForDate(date, statusEl) {
+    try {
+      const draft = normalizeEntry({ ...state.todayDraft, date });
       const idx = state.records.findIndex((x) => x.date === draft.date);
       if (idx >= 0) state.records[idx] = draft;
       else state.records.push(draft);
@@ -266,9 +305,15 @@
       ensureTodayDraft();
       renderHistory();
       renderAnalytics();
+      if (date !== todayStr() && state.isBackfillOpen) {
+        const backfillStatusEl = ui.screens.today.querySelector('#backfillStatus');
+        if (backfillStatusEl) {
+          backfillStatusEl.textContent = `Сохранено за ${formatDate(date)}`;
+        }
+      }
     } catch (error) {
-      console.error('[saveTodayEntry] Save failed:', error);
-      showDebugError('saveTodayEntry()', error);
+      console.error('[saveEntryForDate] Save failed:', error);
+      showDebugError('saveEntryForDate()', error);
       if (statusEl) statusEl.textContent = 'Ошибка сохранения';
     }
   }
